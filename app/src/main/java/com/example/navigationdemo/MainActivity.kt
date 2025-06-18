@@ -12,9 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.example.navigationdemo.ui.theme.NavigationDemoTheme
 import kotlinx.serialization.Serializable
 
@@ -34,6 +37,11 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding),
                         backStack = backStack,
                         onBack = { backStack.removeLastOrNull() },
+                        entryDecorators = listOf(
+                            rememberSceneSetupNavEntryDecorator(),
+                            rememberSavedStateNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator()
+                        ),
                         entryProvider = { key ->
                             when (key) {
                                 is HomeScreenKey -> NavEntry(key) {
