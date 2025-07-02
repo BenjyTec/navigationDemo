@@ -4,26 +4,33 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.example.navigationdemo.ui.theme.NavigationDemoTheme
+import com.example.navigationdemo.ui.viewmodel.SampleViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 
 @Serializable
 data object HomeScreenKey : NavKey
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +38,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             NavigationDemoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    val backStack = remember { mutableStateListOf<Any>(HomeScreenKey) }
+
+                    val backStack = rememberNavBackStack(HomeScreenKey)
 
                     NavDisplay(
                         modifier = Modifier.padding(innerPadding),
@@ -45,9 +53,9 @@ class MainActivity : ComponentActivity() {
                         entryProvider = { key ->
                             when (key) {
                                 is HomeScreenKey -> NavEntry(key) {
-                                    Text("Hello World")
+                                    HomeScreen()
                                 }
-                                else -> NavEntry(Unit) { Text("UNKNOWN") }
+                                else -> NavEntry(key) { Text("UNKNOWN") }
                             }
                         }
                     )
@@ -58,9 +66,16 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun HomeScreen(sampleViewModel: SampleViewModel = hiltViewModel()) {
+    val demoValue by sampleViewModel.demoFlow.collectAsStateWithLifecycle()
+    Column {
+        Text("Number: $demoValue")
+        Button(
+            onClick = {
+                sampleViewModel.writeValue(demoValue + 1)
+            }
+        ) {
+            Text("INCREMENT")
+        }
+    }
 }
